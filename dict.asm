@@ -11,14 +11,14 @@ section .text
 ; return addres of entrence or 0 if fail
 find_word:
 	.loop:
-		push rdi
-		push rsi
+		mov r10, rdi
+		mov r9, rsi
 
 		add rsi, LIST_POINTER_OFFSET
 		call string_equals
 
-		pop rsi
-		pop rdi
+		mov rsi, r9
+		mov rdi, r10
 
 		cmp rax, 1
 		jz .found

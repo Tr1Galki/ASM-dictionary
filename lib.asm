@@ -15,10 +15,11 @@ global parse_uint
 global parse_int
 global string_copy
 
+%define SYS_EXIT 60
  
 ; Принимает код возврата и завершает текущий процесс
 exit:
-    mov rax, 60
+    mov rax, SYS_EXIT
     syscall
     ret 
 
@@ -70,14 +71,9 @@ print_char:
 
 ; Переводит строку (выводит символ с кодом 0xA)
 print_newline:
-    mov rax, 1
-    mov rdi, 1
-    push 0x0A
-    mov rsi, rsp
-    pop rdx
-    mov rdx, 1
-    syscall
-    ret
+    mov rdi, '\n'
+    jmp print_char
+
 
 
 ; Выводит беззнаковое 8-байтовое число в десятичном формате 
@@ -191,19 +187,19 @@ read_word:
         jnz  .middle
 
         .first:
-            cmp rax, 0x20
+            cmp rax, ' '
             jz  .loop
-            cmp rax, 0x9
+            cmp rax, '	'
             jz  .loop
-            cmp rax, 0xA
+            cmp rax, '\n'
             jz  .loop
 
         .middle:
-            cmp rax, 0x20
+            cmp rax, ' '
             jz  .exit_end
-            cmp rax, 0x9
+            cmp rax, '	'
             jz  .exit_end
-            cmp rax, 0xA
+            cmp rax, '\n'
             jz  .exit_end
 
         .length:
@@ -233,13 +229,13 @@ read_word:
 parse_uint:
     xor rax, rax
     xor rcx, rcx
-    mov r8, 0xA
+    mov r8, 10
 
     .loop:
         movzx r9, byte[rdi+rcx]
-        cmp r9, 0x30
+        cmp r9, '0'
         jb .exit
-        cmp r9, 0x39
+        cmp r9, '9'
         ja .exit
         mul r8
         add rax, r9
@@ -261,7 +257,7 @@ parse_uint:
 parse_int:
     xor rax, rax
     xor rdx, rdx
-    cmp byte[rdi], 0x2D
+    cmp byte[rdi], '-'
     jnz parse_uint 
     inc rdi
     call parse_uint
@@ -280,7 +276,7 @@ string_copy:
         jge .len_problem
         mov al, [rdi+rcx]
         mov [rsi+rcx], al
-        cmp al, 0
+        test al, al
         jz .exit
         inc rcx
         jmp .loop
@@ -290,3 +286,4 @@ string_copy:
     .exit:
         mov rax, rcx
         ret
+

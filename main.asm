@@ -26,7 +26,7 @@ _start:
 	lea rsi, [LIST_POINTER]
 	call find_word
 
-	cmp rax, 0
+	test rax, rax
 	jz .no_key_err
 
 	lea rdi, [rax + LIST_POINTER_OFFSET]
